@@ -6,6 +6,7 @@ import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.validators.FilmValidator;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,13 +20,13 @@ public class FilmController {
     protected Map<Integer, Film> films = new HashMap<>();
 
     @GetMapping
-    public List<Film> getAllFilms() {
+    public List<Film> getFilms() {
         log.debug("Текущее количество фильмов в базе: {}", films.size());
         return new ArrayList<>(films.values());
     }
 
     @PostMapping
-    public Film saveFilm(@RequestBody Film film) {
+    public Film create(@Valid @RequestBody final Film film) {
         FilmValidator.validate(film);
         film.setId(nextID);
         films.put(film.getId(), film);
@@ -35,7 +36,7 @@ public class FilmController {
     }
 
     @PutMapping
-    public Film updateFilm(@RequestBody Film film) {
+    public Film update(@Valid @RequestBody final Film film) {
         if (!films.containsKey(film.getId())) {
             throw new ValidationException("Фильм с ID - " + film.getId() + " не найден в базе");
         }
