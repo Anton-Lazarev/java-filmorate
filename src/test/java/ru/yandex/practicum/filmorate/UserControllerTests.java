@@ -1,165 +1,146 @@
 package ru.yandex.practicum.filmorate;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import ru.yandex.practicum.filmorate.controllers.UserController;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
 import java.time.LocalDate;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@WebMvcTest(controllers = UserController.class)
 public class UserControllerTests {
+    static Validator validator;
     UserController controller;
     User user;
+
+    @BeforeAll
+    public static void start() {
+        validator = Validation.buildDefaultValidatorFactory().getValidator();
+    }
 
     @BeforeEach
     void beforeEach() {
         controller = new UserController();
-        user = new User();
-        user.setEmail("123@123.ru");
-        user.setLogin("testLogin");
-        user.setName("TestingName");
-        user.setBirthday(LocalDate.of(2002, 2, 23));
+        user = User.builder()
+                .email("123@123.ru")
+                .login("testLogin")
+                .name("TestingName")
+                .birthday(LocalDate.of(2002, 2, 23))
+                .build();
     }
 
     @Test
     void correctSaveUser() {
-        controller.saveUser(user);
+        controller.create(user);
         assertEquals(1, user.getId());
     }
 
     @Test
     void correctSaveSeveralUsers() {
-        controller.saveUser(user);
-        controller.saveUser(user);
-        controller.saveUser(user);
-        controller.saveUser(user);
-        controller.saveUser(user);
-        controller.saveUser(user);
-        controller.saveUser(user);
-        assertEquals(7, controller.getAllUsers().size());
+        controller.create(user);
+        controller.create(user);
+        controller.create(user);
+        controller.create(user);
+        controller.create(user);
+        controller.create(user);
+        controller.create(user);
+        assertEquals(7, controller.getUsers().size());
     }
 
     @Test
-    void getExceptionWhenSaveUserAndEmailIncorrect() {
+    void getValidationExceptionWhenEmailIncorrect() {
         user.setEmail("dfghjkasdj.ru");
-        final ValidationException exception = assertThrows(ValidationException.class, () -> controller.saveUser(user));
-        assertEquals("Передана некорректная почта", exception.getMessage());
+        Set<ConstraintViolation<User>> errors = validator.validate(user);
+        ConstraintViolation<User> error = errors.stream().findFirst().orElseThrow(() -> new RuntimeException("Отсутствует ошибка валидации"));
+        assertEquals("Передана некорректная почта", error.getMessage());
     }
 
     @Test
-    void getExceptionWhenSaveUserAndLoginIsNull() {
+    void getValidationExceptionWhenLoginIsNull() {
         user.setLogin(null);
-        final ValidationException exception = assertThrows(ValidationException.class, () -> controller.saveUser(user));
-        assertEquals("Логин пользователя не может быть пустым", exception.getMessage());
+        Set<ConstraintViolation<User>> errors = validator.validate(user);
+        ConstraintViolation<User> error = errors.stream().findFirst().orElseThrow(() -> new RuntimeException("Отсутствует ошибка валидации"));
+        assertEquals("Логин пользователя не может быть пустым", error.getMessage());
     }
 
     @Test
     void getExceptionWhenSaveUserAndLoginWithBlank() {
         user.setLogin("my new login");
-        final ValidationException exception = assertThrows(ValidationException.class, () -> controller.saveUser(user));
+        final ValidationException exception = assertThrows(ValidationException.class, () -> controller.create(user));
         assertEquals("Логин пользователя не может содержать пробелы", exception.getMessage());
     }
 
     @Test
     void nameEqualsLoginWhenNameIsNull() {
         user.setName(null);
-        controller.saveUser(user);
+        controller.create(user);
         assertEquals("testLogin", user.getName());
     }
 
     @Test
     void nameEqualsLoginWhenNameIsBlank() {
         user.setName("         ");
-        controller.saveUser(user);
+        controller.create(user);
         assertEquals("testLogin", user.getName());
     }
 
     @Test
     void getExceptionWhenSaveUserAndBirthdayInFuture() {
         user.setBirthday(LocalDate.of(2120, 6, 13));
-        final ValidationException exception = assertThrows(ValidationException.class, () -> controller.saveUser(user));
-        assertEquals("Введена дата рождения в будущем", exception.getMessage());
+        Set<ConstraintViolation<User>> errors = validator.validate(user);
+        ConstraintViolation<User> error = errors.stream().findFirst().orElseThrow(() -> new RuntimeException("Отсутствует ошибка валидации"));
+        assertEquals("Введена дата рождения в будущем", error.getMessage());
     }
 
     @Test
     void correctUpdateUser() {
-        controller.saveUser(user);
-        User update = new User();
-        update.setId(user.getId());
-        update.setEmail("update@update.com");
-        update.setLogin("UPDATED");
-        update.setName("updatedName");
-        update.setBirthday(LocalDate.of(2001, 1, 24));
-        controller.updateUser(update);
-        assertEquals(update.getLogin(), controller.getAllUsers().get(controller.getAllUsers().size() - 1).getLogin());
+        controller.create(user);
+        User update = User.builder()
+                .id(user.getId())
+                .email("update@update.com")
+                .login("UPDATED")
+                .name("updatedName")
+                .birthday(LocalDate.of(2001, 1, 24))
+                .build();
+        controller.update(update);
+        assertEquals(update.getLogin(), controller.getUsers().get(controller.getUsers().size() - 1).getLogin());
     }
 
     @Test
     void correctUpdateUserWhenNameIsNull() {
-        controller.saveUser(user);
-        User update = new User();
-        update.setId(user.getId());
-        update.setEmail("update@update.com");
-        update.setLogin("UPDATED");
-        update.setName(null);
-        update.setBirthday(LocalDate.of(2001, 1, 24));
-        controller.updateUser(update);
-        assertEquals(update.getLogin(), controller.getAllUsers().get(controller.getAllUsers().size() - 1).getName());
-    }
-
-    @Test
-    void getExceptionWhenUpdateUserAndEmailIncorrect() {
-        controller.saveUser(user);
-        User update = new User();
-        update.setId(user.getId());
-        update.setEmail("update.com");
-        update.setLogin("UPDATED");
-        update.setName("updatedName");
-        update.setBirthday(LocalDate.of(2001, 1, 24));
-        final ValidationException exception = assertThrows(ValidationException.class, () -> controller.updateUser(update));
-        assertEquals("Передана некорректная почта", exception.getMessage());
-    }
-
-    @Test
-    void getExceptionWhenUpdateUserAndLoginIsNull() {
-        controller.saveUser(user);
-        User update = new User();
-        update.setId(user.getId());
-        update.setEmail("updated@update.com");
-        update.setLogin(null);
-        update.setName("updatedName");
-        update.setBirthday(LocalDate.of(2001, 1, 24));
-        final ValidationException exception = assertThrows(ValidationException.class, () -> controller.updateUser(update));
-        assertEquals("Логин пользователя не может быть пустым", exception.getMessage());
+        controller.create(user);
+        User update = User.builder()
+                .id(user.getId())
+                .email("update@update.com")
+                .login("UPDATED")
+                .name(null)
+                .birthday(LocalDate.of(2001, 1, 24))
+                .build();
+        controller.update(update);
+        assertEquals(update.getLogin(), controller.getUsers().get(controller.getUsers().size() - 1).getName());
     }
 
     @Test
     void getExceptionWhenUpdateUserAndLoginWithBlank() {
-        controller.saveUser(user);
-        User update = new User();
-        update.setId(user.getId());
-        update.setEmail("updated@update.com");
-        update.setLogin("updated new login");
-        update.setName("updatedName");
-        update.setBirthday(LocalDate.of(2001, 1, 24));
-        final ValidationException exception = assertThrows(ValidationException.class, () -> controller.updateUser(update));
+        controller.create(user);
+        User update = User.builder()
+                .id(user.getId())
+                .email("updated@update.com")
+                .login("updated new login")
+                .name("updatedName")
+                .birthday(LocalDate.of(2001, 1, 24))
+                .build();
+        final ValidationException exception = assertThrows(ValidationException.class, () -> controller.update(update));
         assertEquals("Логин пользователя не может содержать пробелы", exception.getMessage());
-    }
-
-    @Test
-    void getExceptionWhenUpdateUserAndBirthdayInFuture() {
-        controller.saveUser(user);
-        User update = new User();
-        update.setId(user.getId());
-        update.setEmail("updated@update.com");
-        update.setLogin("UPDATED");
-        update.setName("updatedName");
-        update.setBirthday(LocalDate.of(2111, 11, 21));
-        final ValidationException exception = assertThrows(ValidationException.class, () -> controller.updateUser(update));
-        assertEquals("Введена дата рождения в будущем", exception.getMessage());
     }
 }

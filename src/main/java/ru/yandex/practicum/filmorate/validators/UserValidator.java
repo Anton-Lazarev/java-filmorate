@@ -3,8 +3,6 @@ package ru.yandex.practicum.filmorate.validators;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.time.LocalDate;
-
 public class UserValidator {
     public static void validate(User user) {
         if (user.getLogin().contains(" ")) {
