@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.validators.FilmValidator;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
@@ -27,7 +26,6 @@ public class FilmController {
 
     @PostMapping
     public Film create(@Valid @RequestBody final Film film) {
-        FilmValidator.validate(film);
         film.setId(nextID);
         films.put(film.getId(), film);
         nextID++;
@@ -40,7 +38,6 @@ public class FilmController {
         if (!films.containsKey(film.getId())) {
             throw new ValidationException("Фильм с ID - " + film.getId() + " не найден в базе");
         }
-        FilmValidator.validate(film);
         films.put(film.getId(), film);
         log.debug("Обновлен фильм: {}; его ID: {}", film.getName(), film.getId());
         return film;
