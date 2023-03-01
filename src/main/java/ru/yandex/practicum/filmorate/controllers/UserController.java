@@ -1,36 +1,60 @@
 package ru.yandex.practicum.filmorate.controllers;
 
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
-import ru.yandex.practicum.filmorate.validators.UserValidator;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
 public class UserController {
-    UserStorage userStorage = new InMemoryUserStorage();
+    UserService userService;
+
+    @Autowired
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @GetMapping
     public List<User> getUsers() {
-        return userStorage.getAllUsers();
+        return userService.getAllUsers();
     }
 
     @PostMapping
     public User create(@Valid @RequestBody final User user) {
-        return userStorage.addUser(user);
+        return userService.addUser(user);
     }
 
     @PutMapping
     public User update(@Valid @RequestBody final User user) {
-        return userStorage.updateUser(user);
+        return userService.updateUser(user);
+    }
+
+    @GetMapping("/{id}")
+    public User getUserByID(@PathVariable int id) {
+        return userService.getUserByID(id);
+    }
+
+    @PutMapping("/{userID}/friends/{friendID}")
+    public String addFriendship(@PathVariable int userID, @PathVariable int friendID) {
+        return userService.addFriendship(userID, friendID);
+    }
+
+    @DeleteMapping("/{userID}/friends/{friendID}")
+    public String removeFriendship(@PathVariable int userID, @PathVariable int friendID) {
+        return userService.removeFriendship(userID, friendID);
+    }
+
+    @GetMapping("/{userID}/friends")
+    public List<User> getFriendsOfUser(@PathVariable int userID) {
+        return userService.getFriendsOfUser(userID);
+    }
+
+    @GetMapping("/{userID}/friends/common/{anotherID}")
+    public List<User> getFriendsCrossing(@PathVariable int userID, @PathVariable int anotherID) {
+        return userService.getFriendsCrossing(userID, anotherID);
     }
 }

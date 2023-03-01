@@ -2,14 +2,11 @@ package ru.yandex.practicum.filmorate.storage.user;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.exceptions.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.validators.UserValidator;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 @Slf4j
@@ -23,7 +20,6 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     public User addUser(User user) {
-        UserValidator.validate(user);
         user.setId(nextID);
         users.put(user.getId(), user);
         nextID++;
@@ -33,7 +29,7 @@ public class InMemoryUserStorage implements UserStorage {
 
     public User updateUser(User user) {
         if (!users.containsKey(user.getId())) {
-            throw new ValidationException("Пользователь с ID - " + user.getId() + " не найден в базе");
+            throw new UserNotFoundException("Пользователь с ID - " + user.getId() + " не найден в базе");
         }
         UserValidator.validate(user);
         users.put(user.getId(), user);
@@ -43,9 +39,69 @@ public class InMemoryUserStorage implements UserStorage {
 
     public void deleteUserByID(Integer id) {
         if (!users.containsKey(id)) {
-            throw new ValidationException("Пользователь с ID - " + id + " не найден в базе");
+            throw new UserNotFoundException("Пользователь с ID - " + id + " не найден в базе");
         }
         users.remove(id);
         log.debug("Пользователь с ID {} удалён из базы, в базе осталось {} пользователей", id, users.size());
+    }
+
+    public User findUserByID(Integer id) {
+        if (!users.containsKey(id)) {
+            throw new UserNotFoundException("Пользователь с ID - " + id + " не найден в базе");
+        }
+        log.debug("Пользователь с ID {} запрошен из базы", id);
+        return users.get(id);
+    }
+
+    public boolean addFriendship(Integer userID, Integer friendID) {
+        if (!users.containsKey(userID) || !users.containsKey(friendID)) {
+            throw new UserNotFoundException("Один из пользователей отсутствует в базе, добавление друга невозможно");
+        }
+        boolean successAdded = addFriend(users.get(userID), users.get(friendID));
+        //Дружба - процесс обоюдный, поэтому сразу добавляем исходного пользователя к другу
+        addFriend(users.get(friendID), users.get(userID));
+
+        if (successAdded) {
+            log.debug("Пользователь с ID {} успешно добавлен в друзья к пользователю с ID {}", friendID, userID);
+        } else {
+            log.debug("Пользователь с ID {} уже находится в друзьях у пользователя с ID {}", friendID, userID);
+        }
+        return successAdded;
+    }
+
+    public boolean removeFriend(Integer userID, Integer friendID) {
+        if (!users.containsKey(userID)) {
+            throw new UserNotFoundException("Пользователь с ID - " + userID + " не найден в базе");
+        }
+        boolean successRemoved = removeFriend(users.get(userID), users.get(friendID));
+        //Удаление из друзей подобно дружбе - процесс обоюдный, поэтому сразу убираем исходного пользователя у друга
+        removeFriend(users.get(friendID), users.get(userID));
+
+        if (successRemoved) {
+            log.debug("Пользователь с ID {} успешно удален из друзей у пользователя с ID {}", friendID, userID);
+        } else {
+            log.debug("Пользователь с ID {} отсутствует в друзьях у пользователя с ID {}", friendID, userID);
+        }
+        return successRemoved;
+    }
+
+    private boolean addFriend(User user, User friend) {
+        Set<Integer> allFriends = user.getFriends();
+        if (allFriends == null) {
+            allFriends = new HashSet<>();
+        }
+        boolean isAdded = allFriends.add(friend.getId());
+        user.setFriends(allFriends);
+        return isAdded;
+    }
+
+    private boolean removeFriend(User user, User friend) {
+        Set<Integer> allFriends = user.getFriends();
+        if (allFriends == null) {
+            return false;
+        }
+        boolean isRemoved = allFriends.remove(friend.getId());
+        user.setFriends(allFriends);
+        return isRemoved;
     }
 }
