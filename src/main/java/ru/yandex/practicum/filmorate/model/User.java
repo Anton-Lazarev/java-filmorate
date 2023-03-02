@@ -22,5 +22,5 @@ public class User {
     private String name;
     @PastOrPresent(message = "Введена дата рождения в будущем")
     private LocalDate birthday;
-    Set<Integer> friends;
+    private Set<Integer> friends;
 }

@@ -24,5 +24,5 @@ public class Film {
     private LocalDate releaseDate;
     @Min(value = 1, message = "Длительность фильма должна быть больше 0")
     private int duration;
-    Set<Integer> likes;
+    private Set<Integer> likes;
 }

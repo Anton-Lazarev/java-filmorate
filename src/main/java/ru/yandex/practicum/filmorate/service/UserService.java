@@ -9,14 +9,14 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.validators.UserValidator;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 public class UserService {
-    private UserStorage userStorage;
+    private final UserStorage userStorage;
 
     @Autowired
     public UserService(UserStorage storage) {
@@ -60,35 +60,25 @@ public class UserService {
     }
 
     public List<User> getFriendsOfUser(int userID) {
-        List<User> friends = new ArrayList<>();
-        Set<Integer> friendIDs = userStorage.findUserByID(userID).getFriends();
-        if (friendIDs == null || friendIDs.isEmpty()) {
-            log.debug("Запрошен список друзей для пользователя с ID {} ; запрошенный список пуст", userID);
-            return friends;
+        log.debug("Запрошен список общих друзей у пользователей ID {}", userID);
+        Set<Integer> friends = userStorage.findUserByID(userID).getFriends();
+        if (friends.isEmpty()) {
+            return new ArrayList<>();
         }
-        for (int id : friendIDs) {
-            friends.add(userStorage.findUserByID(id));
-        }
-        log.debug("Запрошен список друзей для пользователя с ID {} ; итоговый список размером {}", userID, friends.size());
-        return friends;
+        return friends.stream()
+                .map(userStorage::findUserByID)
+                .collect(Collectors.toList());
     }
 
     public List<User> getFriendsCrossing(int userID, int anotherUserID) {
-        List<User> collectedFriends = new ArrayList<>();
-        Set<Integer> userFriends = userStorage.findUserByID(userID).getFriends();
-        Set<Integer> anotherUserFriends = userStorage.findUserByID(anotherUserID).getFriends();
-        if (userFriends == null || anotherUserFriends == null) {
-            log.debug("Запрошен список общих друзей у пользователей ID {} и {} ; итоговый список пуст", userID, anotherUserID);
-            return collectedFriends;
-        }
-        //Создаём новый сет, чтоб сеты внутри пользователей не перетирались
-        Set<Integer> crossedFriends = new HashSet<>(userFriends);
-        crossedFriends.retainAll(anotherUserFriends);
-        for (int id : crossedFriends) {
-            collectedFriends.add(userStorage.findUserByID(id));
-        }
-        log.debug("Запрошен список общих друзей у пользователей ID {} и {} ; итоговый список размером {}", userID, anotherUserID, collectedFriends.size());
-        return collectedFriends;
+        final Set<Integer> userFriends = userStorage.findUserByID(userID).getFriends();
+        final Set<Integer> anotherUserFriends = userStorage.findUserByID(anotherUserID).getFriends();
+
+        log.debug("Запрошен список общих друзей у пользователей ID {} и {}", userID, anotherUserID);
+        return userFriends.stream()
+                .filter(anotherUserFriends::contains)
+                .map(userStorage::findUserByID)
+                .collect(Collectors.toList());
     }
 
     public boolean checkUserIdInStorage(Integer id) {
