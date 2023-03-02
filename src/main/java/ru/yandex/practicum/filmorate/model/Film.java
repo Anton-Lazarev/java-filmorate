@@ -9,6 +9,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
+import java.util.Set;
 
 @Data
 @Builder
@@ -23,4 +24,5 @@ public class Film {
     private LocalDate releaseDate;
     @Min(value = 1, message = "Длительность фильма должна быть больше 0")
     private int duration;
+    Set<Integer> likes;
 }

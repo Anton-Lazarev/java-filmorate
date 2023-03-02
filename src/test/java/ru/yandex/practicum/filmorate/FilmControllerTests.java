@@ -4,8 +4,13 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controllers.FilmController;
+import ru.yandex.practicum.filmorate.exceptions.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
@@ -28,7 +33,7 @@ public class FilmControllerTests {
 
     @BeforeEach
     void beforeEach() {
-        controller = new FilmController();
+        controller = new FilmController(new FilmService(new InMemoryFilmStorage(), new UserService(new InMemoryUserStorage())));
         film = Film.builder()
                 .name("firstName")
                 .description("description for FIRST film")
@@ -121,7 +126,7 @@ public class FilmControllerTests {
                 .releaseDate(LocalDate.of(2005, 11, 12))
                 .duration(124)
                 .build();
-        final ValidationException exception = assertThrows(ValidationException.class, () -> controller.update(update));
+        final FilmNotFoundException exception = assertThrows(FilmNotFoundException.class, () -> controller.update(update));
         assertEquals("Фильм с ID - 50 не найден в базе", exception.getMessage());
     }
 }
