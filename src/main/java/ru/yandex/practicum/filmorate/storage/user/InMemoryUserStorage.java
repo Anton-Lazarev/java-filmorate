@@ -85,6 +85,10 @@ public class InMemoryUserStorage implements UserStorage {
         return successRemoved;
     }
 
+    public boolean idIsPresent(Integer id) {
+        return users.containsKey(id);
+    }
+
     private boolean addFriend(User user, User friend) {
         Set<Integer> allFriends = user.getFriends();
         if (allFriends == null) {
