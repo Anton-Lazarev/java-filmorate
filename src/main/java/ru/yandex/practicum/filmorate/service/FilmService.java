@@ -51,7 +51,7 @@ public class FilmService {
         if (success) {
             return String.format("Фильм с ID %d получил лайк от пользователя с ID %d", filmID, userID);
         } else {
-            return String.format("Пользователь с ID %d уже лайкнул фильм с ID %d", userID, filmID);
+            return String.format("Пользователь с ID %d уже поставил лайк фильму с ID %d", userID, filmID);
         }
     }
 
