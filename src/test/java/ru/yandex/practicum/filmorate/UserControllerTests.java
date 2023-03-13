@@ -3,10 +3,11 @@ package ru.yandex.practicum.filmorate;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import ru.yandex.practicum.filmorate.controllers.UserController;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
@@ -17,7 +18,6 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@WebMvcTest(controllers = UserController.class)
 public class UserControllerTests {
     static Validator validator;
     UserController controller;
@@ -30,7 +30,7 @@ public class UserControllerTests {
 
     @BeforeEach
     void beforeEach() {
-        controller = new UserController();
+        controller = new UserController(new UserService(new InMemoryUserStorage()));
         user = User.builder()
                 .email("123@123.ru")
                 .login("testLogin")
