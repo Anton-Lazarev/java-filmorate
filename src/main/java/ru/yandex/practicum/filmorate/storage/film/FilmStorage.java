@@ -13,4 +13,5 @@ public interface FilmStorage {
     boolean addLike(Integer filmID, Integer userID);
     boolean removeLike(Integer filmID, Integer userID);
     boolean idIsPresent(Integer id);
+    List<Film> findTopLikedFilms(Integer count);
 }

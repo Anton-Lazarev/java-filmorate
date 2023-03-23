@@ -6,6 +6,7 @@ import ru.yandex.practicum.filmorate.exceptions.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -81,6 +82,17 @@ public class InMemoryFilmStorage implements FilmStorage {
             log.debug("Лайк от пользователя с ID {} отсутствует у фильма с ID {}", userID, filmID);
         }
         return isRemoved;
+    }
+
+    public List<Film> findTopLikedFilms(Integer count) {
+        //Здесь ниже в сортировках используем отрицательное значение компаратора, чтоб добиться убывающего порядка
+        if (films.size() <= count) {
+            log.debug("Запрошенное количество фильмов превышает базу фильмов, итоговый размер топ списка {}", films.size());
+            return films.values().stream().sorted(Comparator.comparingInt(film -> -film.getLikes().size()))
+                    .collect(Collectors.toList());
+        }
+        return films.values().stream().sorted(Comparator.comparingInt(film -> -film.getLikes().size()))
+                .limit(count).collect(Collectors.toList());
     }
 
     public boolean idIsPresent(Integer id) {

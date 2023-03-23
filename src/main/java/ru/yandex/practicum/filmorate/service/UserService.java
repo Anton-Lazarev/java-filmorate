@@ -8,10 +8,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.validators.UserValidator;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -60,25 +57,13 @@ public class UserService {
     }
 
     public List<User> getFriendsOfUser(int userID) {
-        log.debug("Запрошен список общих друзей у пользователей ID {}", userID);
-        Set<Integer> friends = userStorage.findUserByID(userID).getFriends();
-        if (friends.isEmpty()) {
-            return new ArrayList<>();
-        }
-        return friends.stream()
-                .map(userStorage::findUserByID)
-                .collect(Collectors.toList());
+        log.debug("Запрошен список друзей у пользователя с ID {}", userID);
+        return userStorage.getFriendsOfUser(userID);
     }
 
     public List<User> getFriendsCrossing(int userID, int anotherUserID) {
-        final Set<Integer> userFriends = userStorage.findUserByID(userID).getFriends();
-        final Set<Integer> anotherUserFriends = userStorage.findUserByID(anotherUserID).getFriends();
-
         log.debug("Запрошен список общих друзей у пользователей ID {} и {}", userID, anotherUserID);
-        return userFriends.stream()
-                .filter(anotherUserFriends::contains)
-                .map(userStorage::findUserByID)
-                .collect(Collectors.toList());
+        return userStorage.getFriendsCrossing(userID, anotherUserID);
     }
 
     public boolean checkUserIdInStorage(Integer id) {

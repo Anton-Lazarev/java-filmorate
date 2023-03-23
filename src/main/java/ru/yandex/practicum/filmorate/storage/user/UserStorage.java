@@ -13,4 +13,6 @@ public interface UserStorage {
     boolean addFriendship(Integer userID, Integer friendID);
     boolean removeFriend(Integer userID, Integer friendID);
     boolean idIsPresent(Integer id);
+    List<User> getFriendsOfUser(Integer id);
+    List<User> getFriendsCrossing(int userID, int anotherUserID);
 }

@@ -9,9 +9,7 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.validators.FilmValidator;
 
 import javax.validation.ValidationException;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -71,12 +69,7 @@ public class FilmService {
         if (count <= 0) {
             throw new ValidationException("Количество выводимых фильмов должно быть больше 0");
         }
-        //Здесь ниже в сортировках используем отрицательное значение компаратора, чтоб добиться убывающего порядка
-        if (filmStorage.getAllFilms().size() <= count) {
-            return filmStorage.getAllFilms().stream().sorted(Comparator.comparingInt(film -> - film.getLikes().size()))
-                    .collect(Collectors.toList());
-        }
-        return filmStorage.getAllFilms().stream().sorted(Comparator.comparingInt(film -> - film.getLikes().size()))
-                .limit(count).collect(Collectors.toList());
+        log.info("Запрошен топ фильмов размерностью {}", count);
+        return filmStorage.findTopLikedFilms(count);
     }
 }
