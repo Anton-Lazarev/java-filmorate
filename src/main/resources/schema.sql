@@ -33,11 +33,9 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS friendship (
     user_id INTEGER REFERENCES users(id),
     friend_id INTEGER REFERENCES users(id),
-    status VARCHAR(50) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS likes (
   film_id INTEGER REFERENCES films(id),
   user_id INTEGER REFERENCES users(id),
-  stamp TIMESTAMP NOT NULL
 );
