@@ -11,7 +11,7 @@ public interface UserStorage {
     void deleteUserByID(Integer id);
     User findUserByID(Integer id);
     boolean addFriendship(Integer userID, Integer friendID);
-    boolean removeFriend(Integer userID, Integer friendID);
+    boolean removeFriendship(Integer userID, Integer friendID);
     boolean idIsPresent(Integer id);
     List<User> getFriendsOfUser(Integer id);
     List<User> getFriendsCrossing(int userID, int anotherUserID);

@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -16,7 +17,7 @@ public class UserService {
     private final UserStorage userStorage;
 
     @Autowired
-    public UserService(UserStorage storage) {
+    public UserService(@Qualifier("UserDbStorage") UserStorage storage) {
         this.userStorage = storage;
     }
 
@@ -48,7 +49,7 @@ public class UserService {
     }
 
     public String removeFriendship(int userID, int friendID) {
-        boolean success = userStorage.removeFriend(userID, friendID);
+        boolean success = userStorage.removeFriendship(userID, friendID);
         if (success) {
             return String.format("Пользователь с ID %d успешно удален из друзей у пользователя с ID %d", friendID, userID);
         } else {
@@ -57,17 +58,17 @@ public class UserService {
     }
 
     public List<User> getFriendsOfUser(int userID) {
-        log.debug("Запрошен список друзей у пользователя с ID {}", userID);
+        log.info("Запрошен список друзей у пользователя с ID {}", userID);
         return userStorage.getFriendsOfUser(userID);
     }
 
     public List<User> getFriendsCrossing(int userID, int anotherUserID) {
-        log.debug("Запрошен список общих друзей у пользователей ID {} и {}", userID, anotherUserID);
+        log.info("Запрошен список общих друзей у пользователей ID {} и {}", userID, anotherUserID);
         return userStorage.getFriendsCrossing(userID, anotherUserID);
     }
 
     public boolean checkUserIdInStorage(Integer id) {
-        log.debug("Запрошена проверка ID {} в базе пользователей", id);
+        log.info("Запрошена проверка ID {} в базе пользователей", id);
         if (!userStorage.idIsPresent(id)) {
             throw new UserNotFoundException("Пользователь с ID - " + id + " не найден в базе");
         }

@@ -9,7 +9,7 @@ import ru.yandex.practicum.filmorate.validators.UserValidator;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Component
+@Component("UserRamStorage")
 @Slf4j
 public class InMemoryUserStorage implements UserStorage {
     protected int nextID = 1;
@@ -70,7 +70,7 @@ public class InMemoryUserStorage implements UserStorage {
         return successAdded;
     }
 
-    public boolean removeFriend(Integer userID, Integer friendID) {
+    public boolean removeFriendship(Integer userID, Integer friendID) {
         if (!users.containsKey(userID)) {
             throw new UserNotFoundException("Пользователь с ID - " + userID + " не найден в базе");
         }
