@@ -32,10 +32,10 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE TABLE IF NOT EXISTS friendship (
     user_id INTEGER REFERENCES users(id),
-    friend_id INTEGER REFERENCES users(id),
+    friend_id INTEGER REFERENCES users(id)
 );
 
 CREATE TABLE IF NOT EXISTS likes (
   film_id INTEGER REFERENCES films(id),
-  user_id INTEGER REFERENCES users(id),
+  user_id INTEGER REFERENCES users(id)
 );
