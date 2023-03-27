@@ -88,8 +88,8 @@ public class UserDbStorage implements UserStorage {
         if (!idIsPresent(userID) || !idIsPresent(friendID)) {
             throw new UserNotFoundException("Один из пользователей отсутствует в базе, регистрация дружбы невозможна");
         }
-        SqlRowSet friendshipRow = jdbcTemplate.queryForRowSet("SELECT * FROM friendship WHERE user_id = ? AND friend_id=?"
-                , userID, friendID);
+        SqlRowSet friendshipRow = jdbcTemplate.queryForRowSet("SELECT * FROM friendship WHERE user_id = ? AND friend_id = ?",
+                userID, friendID);
         if (friendshipRow.next()) {
             log.debug("Пользователь с ID {} уже находится в друзьях у пользователя с ID {}", friendID, userID);
             return false;
