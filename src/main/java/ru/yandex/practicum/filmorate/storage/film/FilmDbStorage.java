@@ -121,12 +121,11 @@ public class FilmDbStorage implements FilmStorage {
         if (likeRow.next()) {
             log.debug("Пользователь с ID {} уже лайкнул фильм с ID {}", userID, filmID);
             return false;
-        } else {
-            String sqlQuery = "INSERT INTO likes (film_id, user_id) VALUES(?, ?)";
-            jdbcTemplate.update(sqlQuery, filmID, userID);
-            log.debug("Добавлен лайк от пользователя с ID {} к фильму с ID {}", userID, filmID);
-            return true;
         }
+        String sqlQuery = "INSERT INTO likes (film_id, user_id) VALUES(?, ?)";
+        jdbcTemplate.update(sqlQuery, filmID, userID);
+        log.debug("Добавлен лайк от пользователя с ID {} к фильму с ID {}", userID, filmID);
+        return true;
     }
 
     @Override
@@ -139,10 +138,9 @@ public class FilmDbStorage implements FilmStorage {
         if (deletedEntity > 0) {
             log.debug("Удален лайк от пользователя с ID {} к фильму с ID {}", userID, filmID);
             return true;
-        } else {
-            log.debug("Лайк от пользователя с ID {} к фильму с ID {} отсутствует в базе", userID, filmID);
-            return false;
         }
+        log.debug("Лайк от пользователя с ID {} к фильму с ID {} отсутствует в базе", userID, filmID);
+        return false;
     }
 
     @Override

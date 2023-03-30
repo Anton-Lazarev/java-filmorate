@@ -93,12 +93,11 @@ public class UserDbStorage implements UserStorage {
         if (friendshipRow.next()) {
             log.debug("Пользователь с ID {} уже находится в друзьях у пользователя с ID {}", friendID, userID);
             return false;
-        } else {
-            String sqlQuery = "INSERT INTO friendship(user_id, friend_id) VALUES(?, ?)";
-            jdbcTemplate.update(sqlQuery, userID, friendID);
-            log.debug("Пользователь с ID {} успешно добавлен в друзья к пользователю с ID {}", friendID, userID);
         }
-        return false;
+        String sqlQuery = "INSERT INTO friendship(user_id, friend_id) VALUES(?, ?)";
+        jdbcTemplate.update(sqlQuery, userID, friendID);
+        log.debug("Пользователь с ID {} успешно добавлен в друзья к пользователю с ID {}", friendID, userID);
+        return true;
     }
 
     @Override
@@ -110,10 +109,9 @@ public class UserDbStorage implements UserStorage {
         if (jdbcTemplate.update(sqlQuery, userID, friendID) > 0) {
             log.debug("Пользователь с ID {} успешно удален из друзей у пользователя с ID {}", friendID, userID);
             return true;
-        } else {
-            log.debug("Пользователь с ID {} отсутствует в друзьях у пользователя с ID {}", friendID, userID);
-            return false;
         }
+        log.debug("Пользователь с ID {} отсутствует в друзьях у пользователя с ID {}", friendID, userID);
+        return false;
     }
 
     @Override
@@ -144,7 +142,7 @@ public class UserDbStorage implements UserStorage {
             for (int currFriendID : crossedFriendsID) {
                 crossedFriends.add(findUserByID(currFriendID));
             }
-            log.debug("Сформирован список общих друзей для пользователей с ID {} и {} размерностью {}",userID, anotherUserID, crossedFriends.size());
+            log.debug("Сформирован список общих друзей для пользователей с ID {} и {} размерностью {}", userID, anotherUserID, crossedFriends.size());
         }
         return crossedFriends;
     }
