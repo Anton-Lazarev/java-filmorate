@@ -119,14 +119,10 @@ public class UserDbStorage implements UserStorage {
         List<User> friends = new ArrayList<>();
         String sqlQuery = "SELECT friend_id FROM friendship WHERE user_id = ?";
         List<Integer> friendsID = jdbcTemplate.queryForList(sqlQuery, Integer.class, id);
-        if (friendsID.isEmpty()) {
-            log.debug("Сформированный список друзей для пользователя с ID {} пуст", id);
-        } else {
-            for (int currFriendID : friendsID) {
-                friends.add(findUserByID(currFriendID));
-            }
-            log.debug("Сформирован список друзей для пользователя с ID {} размерностью {}", id, friends.size());
+        for (int currFriendID : friendsID) {
+            friends.add(findUserByID(currFriendID));
         }
+        log.debug("Сформирован список друзей для пользователя с ID {} размерностью {}", id, friends.size());
         return friends;
     }
 
@@ -136,14 +132,10 @@ public class UserDbStorage implements UserStorage {
         String sqlQuery = "SELECT friend_id FROM friendship WHERE user_id = ? " +
                 "AND friend_id IN (SELECT friend_id FROM friendship WHERE user_id = ?)";
         List<Integer> crossedFriendsID = jdbcTemplate.queryForList(sqlQuery, Integer.class, userID, anotherUserID);
-        if (crossedFriendsID.isEmpty()) {
-            log.debug("Сформированный список общих друзей для пользователей с ID {} и {} пуст", userID, anotherUserID);
-        } else {
-            for (int currFriendID : crossedFriendsID) {
-                crossedFriends.add(findUserByID(currFriendID));
-            }
-            log.debug("Сформирован список общих друзей для пользователей с ID {} и {} размерностью {}", userID, anotherUserID, crossedFriends.size());
+        for (int currFriendID : crossedFriendsID) {
+            crossedFriends.add(findUserByID(currFriendID));
         }
+        log.debug("Сформирован список общих друзей для пользователей с ID {} и {} размерностью {}", userID, anotherUserID, crossedFriends.size());
         return crossedFriends;
     }
 
