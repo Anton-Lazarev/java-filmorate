@@ -5,8 +5,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controllers.FilmController;
 import ru.yandex.practicum.filmorate.exceptions.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.MPA;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
@@ -40,6 +40,7 @@ public class FilmControllerTests {
                 .releaseDate(LocalDate.of(2000, 7, 18))
                 .build();
         film.setDuration(50);
+        film.setMpa(MPA.builder().id(1).name("G").build());
     }
 
     @Test

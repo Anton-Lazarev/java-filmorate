@@ -4,11 +4,9 @@ import lombok.Builder;
 import lombok.Data;
 import ru.yandex.practicum.filmorate.validators.LocalDateAfter;
 
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -24,5 +22,8 @@ public class Film {
     private LocalDate releaseDate;
     @Min(value = 1, message = "Длительность фильма должна быть больше 0")
     private int duration;
+    @NotNull(message = "Рейтинг фильма не может быть пустым")
+    private MPA mpa;
+    private List<Genre> genres;
     private Set<Integer> likes;
 }

@@ -6,8 +6,9 @@ import ru.yandex.practicum.filmorate.exceptions.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
-@Component
+@Component("FilmRamStorage")
 @Slf4j
 public class InMemoryFilmStorage implements FilmStorage {
     protected int nextID = 1;
@@ -28,6 +29,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         return film;
     }
 
+    @Override
     public Film updateFilm(Film film) {
         if (!films.containsKey(film.getId())) {
             throw new FilmNotFoundException("Фильм с ID - " + film.getId() + " не найден в базе");
@@ -37,6 +39,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         return film;
     }
 
+    @Override
     public Film getFilmByID(Integer id) {
         if (!films.containsKey(id)) {
             throw new FilmNotFoundException("Фильм с ID - " + id + " не найден в базе");
@@ -45,6 +48,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         return films.get(id);
     }
 
+    @Override
     public void deleteFilmByID(Integer id) {
         if (!films.containsKey(id)) {
             throw new FilmNotFoundException("Фильм с ID - " + id + " не найден в базе");
@@ -53,6 +57,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         log.debug("Фильм с ID {} удалён из базы, в базе осталось {} фильмов", id, films.size());
     }
 
+    @Override
     public boolean addLike(Integer filmID, Integer userID) {
         if (!films.containsKey(filmID)) {
             throw new FilmNotFoundException("Фильм с ID - " + filmID + " не найден в базе");
@@ -68,6 +73,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         return isAdded;
     }
 
+    @Override
     public boolean removeLike(Integer filmID, Integer userID) {
         if (!films.containsKey(filmID)) {
             throw new FilmNotFoundException("Фильм с ID - " + filmID + " не найден в базе");
@@ -83,6 +89,19 @@ public class InMemoryFilmStorage implements FilmStorage {
         return isRemoved;
     }
 
+    @Override
+    public List<Film> findTopLikedFilms(Integer count) {
+        //Здесь ниже в сортировках используем отрицательное значение компаратора, чтоб добиться убывающего порядка
+        if (films.size() <= count) {
+            log.debug("Запрошенное количество фильмов превышает базу фильмов, итоговый размер топ списка {}", films.size());
+            return films.values().stream().sorted(Comparator.comparingInt(film -> -film.getLikes().size()))
+                    .collect(Collectors.toList());
+        }
+        return films.values().stream().sorted(Comparator.comparingInt(film -> -film.getLikes().size()))
+                .limit(count).collect(Collectors.toList());
+    }
+
+    @Override
     public boolean idIsPresent(Integer id) {
         log.debug("Запрошена проверка ID {} в базе пользователей", id);
         return films.containsKey(id);
